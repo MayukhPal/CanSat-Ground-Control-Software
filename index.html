@@ -1,35 +1,297 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>
-            My First Webpage
-        </title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <body>
-        <div id="Header">
-            <div id="Logo">
-                <img src="https://th.bing.com/th?id=OSK.218a2b275b68c9c4fd565b61412ab999&w=46&h=46&c=11&rs=1&qlt=80&o=6&dpr=1.3&pid=SANGAM" height="100px" width="100px">
-            </div>
-            <div id="Heading">
-            <h1>Ramakrishna Mission Vidyapith</h1>
-            <h3>
-                Ramakrishna Nagar, P.O.: Vidyapith, Dist.: Deoghar
-                <br>
-                Jharkhand, India-814 112
-            </h3>
-            </div>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CanSat Ground Control Software</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>INDIA SPACE LAB</h1>
+        <h2>CanSat Ground Control Software (GCS)</h2>
+        <div class="header-right">
+            <span id="missionTime">Mission Time : 00:00:00</span>
+            <button id="syncBtn" onclick="syncPCTime()">
+            <i class="fa-solid fa-rotate">
+            Sync PC Time</i>
+            </button>
+            <span>Status : CONNECTED</span>
         </div>
-        <li>
-            <a href="https://rkmvdeoghar.org/index/p/Admission_Class-XI-2025-Closed">
-                <span></span>
-                Admission to Class XI - 2025 Closed
-            </a>
-        </li>
-        <li>
-            <a href="https://rkmvdeoghar.org/index/p/Result_Admission_Class-VI-2025">
-                Results- Admission to Class VI - 2025
-            </a>
-        </li>
-    </body>
+    </header>
+
+
+    <!-- Dashboard -->
+
+    <main class="dashboard">
+        <section class="card">
+    <h3>Mission Status</h3>
+    <div class="status-box">
+        <h2 id="missionPhase">READY</h2>
+        <p>Mission : CanSat Alpha</p>
+        <p id="missionState">All Systems Nominal</p>
+    </div>
+</section>
+
+<section class="card">
+    <h3>Battery</h3>
+    <h1 id="battery">100%</h1>
+    <progress id="batteryBar" value="100" max="100"></progress>
+</section>
+
+<section class="card">
+    <h3>GPS Status</h3>
+    <h2 id="gpsSat">12 Satellites</h2>
+    <p id="gpsLock">GPS LOCKED</p>
+</section>
+
+<section class="card">
+    <h3>Signal Strength</h3>
+    <h2 id="signal">-67 dBm</h2>
+    <p>Excellent Connection</p>
+</section>
+
+<section class="card large">
+    <h3>Live Telemetry</h3>
+    <table class="telemetry-table">
+        <tr>
+            <td>Altitude</td>
+            <td id="altitude">0 m</td>
+        </tr>
+        <tr>
+            <td>Temperature</td>
+            <td id="temperature">0 °C</td>
+        </tr>
+        <tr>
+            <td>Pressure</td>
+            <td id="pressure">0 hPa</td>
+        </tr>
+        <tr>
+            <td>Humidity</td>
+            <td id="humidity">0 %</td>
+        </tr>
+        <tr>
+            <td>Velocity</td>
+            <td id="velocity">0 m/s</td>
+        </tr>
+    </table>
+</section>
+
+<section class="card large">
+    <h3>Mission COntrols</h3>
+        <div class="control-rows">
+            <button id="launchBtn" onclick="launchMission()">
+                <i class="fa-solid fa-rocket"></i>
+                Launch
+            </button>
+            <button id="pauseBtn" onclick="pauseMission()" disabled>
+                <i class="fa-solid fa-pause"></i>
+                Pause
+            </button>
+            <button id="resumeBtn" onclick="resumeMission()" disabled>
+                <i class="fa-solid fa-play"></i>
+                Resume
+            </button>
+            <button id="resetBtn" onclick="resetMission()" disabled>
+                <i class="fa-solid fa-sync"></i>
+                Reset
+            </button>
+            </div>
+            <div class="control-rows">
+            <button id="abortBtn" onclick="abortMission()" disabled>
+                <i class="fa-solid fa-times"></i>
+                Abort
+            </button>
+            <button id="exportBtn" onclick="exportCSV()" disabled>
+                <i class="fa-solid fa-file-export"></i>
+                Export CSV
+            </button>
+            </div>
+            <div class="control-rows">
+            <button id="separateBtn" onclick="manualSeparation()" disabled>
+                <i class="fa-solid fa-box-open"></i>
+                Separation
+            </button>
+            <button id="parachuteBtn" onclick="deployParachute()" disabled>
+                <i class="fa-solid fa-parachute-box"></i>
+                Parachute
+            </button>
+            <button id="redundantBtn" onclick="redundantActivation()" disabled>
+            <i class="fa-solid fa-shield-halved"></i>
+                Redundant
+            </button>
+        </div>
+</section>
+
+<section class="card large">
+    <div class="card-header">
+        <h3><i class="fa-solid fa-chart-line"></i> Altitude Graph</h3>
+        <button onclick="exportChart(altitudeChart,'altitude')">
+        <i class="fa-solid fa-download"></i> Export
+        </button>
+    </div>
+    <canvas id="altitudeChart"></canvas>
+</section>
+
+<section class="card large">
+    <div class="card-header">
+        <h3><i class="fa-solid fa-temperature-half"></i> Temperature Graph</h3>
+        <button onclick="exportChart(temperatureChart,'temperature')">
+        <i class="fa-solid fa-download"></i> Export
+        </button>
+    </div>
+    <canvas id="temperatureChart"></canvas>
+</section>
+
+<section class="card large">
+    <div class="card-header">
+        <h3>
+            <i class="fa-solid fa-gauge-high"></i>
+            Pressure Graph
+        </h3>
+        <button onclick="exportChart(pressureChart,'pressure')">
+            <i class="fa-solid fa-download"></i>
+            Export
+        </button>
+    </div>
+    <canvas id="pressureChart"></canvas>
+</section>
+
+<section class="card large">
+    <div class="card-header">
+        <h3>
+            <i class="fa-solid fa-battery-three-quarters"></i>
+            Battery Graph
+        </h3>
+        <button onclick="exportChart(batteryChart,'battery')">
+            <i class="fa-solid fa-download"></i>
+            Export
+        </button>
+    </div>
+    <canvas id="batteryChart"></canvas>
+</section>
+
+        <section class="card large">
+            <h3>GPS Tracking</h3>
+            <div id="map"></div>
+            <p><strong>Latitude:</strong> <span id="latitudeValue"></span></p>
+            <p><strong>Longitude:</strong> <span id="longitudeValue"></span></p>
+        </section>
+
+        <section class="card large">
+            <h3>Mission Logs</h3>
+            <div id="missionLog">
+                <p>System Ready...</p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h3>Command Execution Status</h3>
+            <p><strong>Last Command:</strong></p>
+            <p id="lastCommand">None</p>
+            <p><strong>Status:</strong></p>
+            <p id="commandStatus">Waiting...</p>
+            <p><strong>Executed At:</strong></p>
+            <p id="commandTime">--:--:--</p>
+        </section>
+
+        <section class="card">
+
+    <h3>
+        <i class="fa-solid fa-compass"></i>
+        Orientation
+    </h3>
+
+    <div class="orientation-grid">
+
+        <div class="orientation-item">
+            <h4>Pitch</h4>
+            <div class="gauge">
+                <div id="pitchNeedle" class="needle"></div>
+            </div>
+            <span id="pitch">0°</span>
+        </div>
+
+        <div class="orientation-item">
+            <h4>Roll</h4>
+            <div class="gauge">
+                <div id="rollNeedle" class="needle"></div>
+            </div>
+            <span id="roll">0°</span>
+        </div>
+
+        <div class="orientation-item">
+            <h4>Yaw</h4>
+            <div class="gauge">
+                <div id="yawNeedle" class="needle"></div>
+            </div>
+            <span id="yaw">0°</span>
+        </div>
+    </div>
+</section>
+
+        <div class="card">
+            <h3>Mission Progress</h3>
+            <div class="progress-container">
+                <div id="missionProgressBar"></div>
+            </div>
+            <p id="progressText">READY (0%)</p>
+        </div>
+
+        <section class="card">
+            <h3>Error Code</h3>
+            <h1 id="errorCode">0000</h1>
+            <p id="errorStatus">All Systems Normal</p>
+        </section>
+
+    </main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
+<footer class="footer">
+
+    <div>CanSat Ground Control Software</div>
+    <div>India Space Lab Internship Project</div>
+    <div>Version 1.0 | Designed by <strong>Mayukh Pal</strong></div>
+
+</footer>
+<div id="summaryModal" class="modal">
+    <div class="modal-content">
+        <h2><i class="fa-solid fa-rocket"></i> Mission Summary</h2>
+        <table class="summary-table">
+            <tr>
+                <td>Status</td>
+                <td id="summaryStatus"></td>
+            </tr>
+            <tr>
+                <td>Mission Time</td>
+                <td id="summaryTime"></td>
+            </tr>
+            <tr>
+                <td>Maximum Altitude</td>
+                <td id="summaryAltitude"></td>
+            </tr>
+            <tr>
+                <td>Battery Remaining</td>
+                <td id="summaryBattery"></td>
+            </tr>
+        </table>
+        <button onclick="closeSummary()">
+            <i class="fa-solid fa-times"></i>
+            Close
+        </button>
+    </div>
+</div>
+</body>
 </html>
